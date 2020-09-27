@@ -5,9 +5,17 @@ cache:
   yarn: true
   directories:
     - "node_modules"
+    - "$HOME/google-cloud-sdk/"
 services:
   - postgresql
+before_install:
+  - openssl aes-256-cbc -K $encrypted_9f3b5599b056_key -iv $encrypted_9f3b5599b056_iv -in service-account.json.enc -out service-account.json -d
+  - if [ ! -d ${HOME}/google-cloud-sdk ]; then
+      curl https://sdk.cloud.google.com | bash;
+    fi
+  - gcloud auth activate-service-account --key-file service-account.json
 install:
+  - gcloud config set project sandbox-jonaskay
   - bundle install --jobs=3 --retry=3 --deployment
   - nvm install
   - bin/yarn
@@ -15,3 +23,12 @@ before_script:
   - bin/rails db:prepare
 script:
   - bin/rails test
+before_deploy:
+  - openssl aes-256-cbc -K $encrypted_8ad82cc635a3_key -iv $encrypted_8ad82cc635a3_iv -in config/master.key.enc -out config/master.key -d
+  - RAILS_ENV=production bin/rails assets:precompile
+deploy:
+  provider: script
+  script: ./bin/deploy
+  skip_cleanup: true
+  on:
+    branch: master
