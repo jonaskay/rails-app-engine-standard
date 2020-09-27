@@ -1,4 +1,6 @@
 runtime: ruby25
 entrypoint: bundle exec rails server -p $PORT
 env_variables:
+  DATABASE_HOST: /cloudsql/sandbox-jonaskay:europe-west1:rails-demo
+  DATABASE_NAME: rails_app_engine_standard_production
   RAILS_ENV: production
